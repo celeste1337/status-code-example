@@ -6,6 +6,7 @@ const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
+// gets called, calls other stuff depending on if urlStruct is ok
 const urlStruct = {
   '/': htmlHandler.getIndex,
   '/success': jsonHandler.success,
@@ -14,7 +15,15 @@ const urlStruct = {
 };
 
 const onRequest = (request, response) => {
+  const parsedUrl = url.parse(request.url);
+  const params = query.parse(parsedUrl.query);
 
+  // will be true if they try to go to a valid URL, otherwise will be false
+  if (urlStruct[parsedUrl.pathname]) {
+    urlStruct[parsedUrl.pathname](request, response, params);
+  } else {
+    urlStruct.notFound(request, response, params);
+  }
 };
 
 http.createServer(onRequest).listen(port);
